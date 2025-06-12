@@ -3,12 +3,15 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductResponseDto } from './dto/product-response.dto';
+import { Prisma } from '@prisma/client'; // Importación crucial
 
-@Injectable()
+@Injectable() // Asegúrate de que este decorador esté presente
 export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
-  private mapToResponse(product: any): ProductResponseDto {
+  private mapToResponse(
+    product: Prisma.ProductGetPayload<{}>,
+  ): ProductResponseDto {
     return {
       id: product.id,
       product: {
@@ -53,12 +56,13 @@ export class ProductsService {
     sortOrder?: 'asc' | 'desc';
     search?: string;
   }): Promise<{ data: ProductResponseDto[]; total: number }> {
-    const where = {
+    const where: Prisma.ProductWhereInput = {
+      // Tipo explícito añadido
       ...(category && { category }),
       ...(search && {
         name: {
           contains: search,
-          mode: 'insensitive',
+          mode: Prisma.QueryMode.insensitive, // Enum correcto
         },
       }),
     };
